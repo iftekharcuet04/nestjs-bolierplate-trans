@@ -61,6 +61,6 @@ For `returnSuccess` and `returnError`, the `extraData` property is used to pass 
 
 
 
-# In GraphQL
+## In GraphQL
 
 The process of handling validation errors is slightly different. For handling validation error context, use `CustomErrorHandlingPlugin`.
