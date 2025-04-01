@@ -4,6 +4,9 @@ In this project, `returnSuccess` and `returnError` handle responses. `returnSucc
 
 The `CustomExceptionFilter` is used to handle any errors in the application.
 
+**The message translation**
+ depends on request headers Accept-Language such as `en`, `es`
+
 ## Handling Validation Errors
 
 It uses the `validation` property of the error to check if the error is a validation error. If it is, it uses the `key_message` property to replace the default error message with a custom message from the `translation.json` file. If the `key_message` property is not provided, it uses the `NOT_EMPTY_MESSAGE` key as the default key.
