@@ -1,0 +1,40 @@
+version: "3"
+services:
+  nestjs-graphql-boilerplate:
+    container_name: nestjs-graphql-boilerplate
+    build:
+      context: ../
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./../:/app
+
+    user: node
+    ports:
+      - "9393:9393"
+    environment:
+      API_PORT: 9393
+      API_PREFIX: "api/nestjs-graphql-boilerplate"
+      APP_ENVIRONMENT: "development"
+      DATABASE_URL: "mysql://root:root123@boilerplate-mysql:3306/boilerplate"
+      # Redis
+      REDIS_HOST: "boilerplate-redis"
+      REDIS_PORT: 6379
+      REDIS_USE_PASSWORD: "yes"
+      REDIS_PASSWORD: "redisPassword"
+      # Bull
+      BULL_PRUNE_AGE_SECONDS: 86400
+      BULL_PRUNE_KEEP_COUNT: 2000
+      BULL_BOARD_USERNAME: root
+      BULL_BOARD_PASSWORD: root123
+      # Request Rate limit
+      THROTTLE_TTL: 60
+      THROTTLE_LIMIT: 200
+    working_dir: /app
+    command: sh -c "pnpm install && pnpm run start:dev"
+    stop_grace_period: 1s
+
+  boilerplate-redis:
+    image: redis
+    container_name: local-fans-redis
+    command: "--requirepass redisPassword"
+    stop_grace_period: 1s

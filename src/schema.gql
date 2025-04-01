@@ -1,0 +1,19 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input GetUserInput {
+  id: Int!
+}
+
+type Query {
+  getUser(input: GetUserInput!): UserResponseType
+}
+
+type UserResponseType {
+  email: String!
+  id: Int!
+  message: String
+  name: String
+  success: Boolean
+}
