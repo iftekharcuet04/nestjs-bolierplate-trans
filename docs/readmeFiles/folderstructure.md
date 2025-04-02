@@ -78,3 +78,5 @@ The project's rest api follows the following folder structure:
 ├── package.json                     # Node dependencies and scripts
 ├── README.md                        # Project documentation
 ```
+
+**Note**: For the purpose of differentiate I have keep my rest api resource inside rest-api folder.

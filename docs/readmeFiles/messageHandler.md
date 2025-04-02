@@ -64,3 +64,7 @@ For `returnSuccess` and `returnError`, the `extraData` property is used to pass 
 ## In GraphQL
 
 The process of handling validation errors is slightly different. For handling validation error context, use `CustomErrorHandlingPlugin`.
+
+
+**Note**: In this project I also provide some example, how to handle message centrally.
+ Any one can see the swagger(post man) for rest api and apollo server for GraphQL api. 
