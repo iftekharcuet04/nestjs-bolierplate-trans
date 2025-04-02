@@ -199,7 +199,7 @@ export class GraphqlValidationFilter implements GqlExceptionFilter {
         };
       }
       else{
-        // if no validation error looking for others
+        // if no validation error, looking for others
         errorObject = {
           message:
             errorMessage ||
