@@ -65,6 +65,14 @@ npm run push:db
 
 ### Step 7
 
+To seed the table in the database. Use the following command
+
+```
+pnpm prisma:seed
+```
+
+### Step 8
+
 To check the logs, you can use the following command:
 
 ```

@@ -25,8 +25,7 @@
     "fetch:db": "prisma db pull",
     "push:db": "prisma db push",
     "prisma:generate": "prisma generate",
-    "prisma-core:generate": "npx prisma generate --schema prisma-core/schema.prisma",
-    "core-push:db": "npx prisma db push --schema prisma-core/schema.prisma"
+    "prisma:seed": "ts-node prisma/seed/user.seed.ts"
   },
   "keywords": [],
   "license": "",
