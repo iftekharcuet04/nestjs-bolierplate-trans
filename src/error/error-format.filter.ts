@@ -173,52 +173,58 @@ export class GraphqlValidationFilter implements GqlExceptionFilter {
 
     let errorMessage = null;
 
-    const validationErrors = exception?.response?.message;
-    // for rest api validation
-    if (validationErrors && Array.isArray(validationErrors)) {
-      errorObject = {
-        message:
-          this.translationService
-            .translate(validationErrors, this.language)
-            ?.join(",") || "Validation error",
-        status_code: 400,
-        extensions: {
-          code: "Validation error",
-          details:
-            this.translationService.translate(validationErrors, "en") ||
-            "Validation error",
-          exception: exception.extensions?.exception || null,
-          stacktrace:
-            process.env.APP_ENVIRONMENT === "development"
-              ? exception.extensions?.stacktrace
-              : undefined
-        }
-      };
-    }
-    else if (context.getType() === "http") {
-      errorObject = {
-        message:
-          errorMessage ||
-          this.translationService.translate(
-            exception?.response?.message || exception?.response,
-            this.language
-          ) ||
-          this.translationService.translate(
+   
+    if (context.getType() === "http") {
+
+      const validationErrors = exception?.response?.message;
+      // for rest api validation
+      if (validationErrors && Array.isArray(validationErrors)) {
+        errorObject = {
+          message:
+            this.translationService
+              .translate(validationErrors, this.language)
+              ?.join(",") || "Validation error",
+          status_code: 400,
+          extensions: {
+            code: "Validation error",
+            details:
+              this.translationService.translate(validationErrors, "en") ||
+              "Validation error",
+            exception: exception.extensions?.exception || null,
+            stacktrace:
+              process.env.APP_ENVIRONMENT === "development"
+                ? exception.extensions?.stacktrace
+                : undefined
+          }
+        };
+      }
+      else{
+        // if no validation error looking for others
+        errorObject = {
+          message:
+            errorMessage ||
+            this.translationService.translate(
+              exception?.response?.message || exception?.response,
+              this.language
+            ) ||
+            this.translationService.translate(
+              exception?.message,
+              this.language
+            ) ||
             exception?.message,
-            this.language
-          ) ||
-          exception?.message,
-        status_code: this.getGraphQlCodeToStatusCode(exception.response?.code),
-        extensions: {
-          code: exception.error || exception.status || "INTERNAL_SERVER_ERROR",
-          exception: exception.response || null,
-          details: exception.response?.details || exception?.message,
-          stacktrace:
-            process.env.APP_ENVIRONMENT === "development"
-              ? exception.extensions?.stacktrace
-              : undefined
-        }
-      };
+          status_code: this.getGraphQlCodeToStatusCode(exception.response?.code),
+          extensions: {
+            code: exception.error || exception.status || "INTERNAL_SERVER_ERROR",
+            exception: exception.response || null,
+            details: exception.response?.details || exception?.message,
+            stacktrace:
+              process.env.APP_ENVIRONMENT === "development"
+                ? exception.extensions?.stacktrace
+                : undefined
+          }
+        };
+      }
+      
     }
      else {
       // Handle other GraphQL errors
