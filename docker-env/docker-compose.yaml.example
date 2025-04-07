@@ -38,3 +38,22 @@ services:
     container_name: local-fans-redis
     command: "--requirepass redisPassword"
     stop_grace_period: 1s
+
+  boilerplate-mysql:
+    image: mysql:8.0
+    container_name: boilerplate-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "root123"
+      MYSQL_DATABASE: "boilerplate"
+    volumes:
+      - /var/lib/boilerplate-mysql/data:/var/lib/mysql
+    stop_grace_period: 1s
+
+  boilerplate-adminer:
+    image: adminer
+    container_name: boilerplate-adminer
+    links:
+      - boilerplate-mysql:db
+    ports:
+      - "9080:8080"
+    stop_grace_period: 1s
