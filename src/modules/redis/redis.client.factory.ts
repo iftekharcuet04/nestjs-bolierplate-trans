@@ -11,9 +11,10 @@ export const redisClientFactory: FactoryProvider<Redis> = {
       password = process.env.REDIS_PASSWORD;
     }
 
+    const port = Number(process.env.REDIS_PORT);
     const redisInstance = new Redis({
-      host: process.env.REDIS_HOST,
-      port: +process.env.REDIS_PORT,
+      host: process.env.REDIS_HOST || "localhost",
+      port: !isNaN(port) && port > 0 ? port : 6379,
       password
     });
 

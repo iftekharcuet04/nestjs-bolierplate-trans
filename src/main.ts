@@ -47,7 +47,7 @@ function setupSwagger(app: NestFastifyApplication) {
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup(process.env.API_PREFIX, app, document);
+    SwaggerModule.setup(process.env.API_PREFIX || 'api', app, document);
   }
 }
 
@@ -60,6 +60,7 @@ async function bootstrap() {
     // disable if app crashes without any output
     { bufferLogs: true, rawBody: true, bodyParser: true }
   );
+  app.enableShutdownHooks();
   app.useGlobalInterceptors();
   // setup logging
 

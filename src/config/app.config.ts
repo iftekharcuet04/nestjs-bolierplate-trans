@@ -2,8 +2,8 @@ import { registerAs } from "@nestjs/config";
 
 export default registerAs("app", () => ({
   databaseUrl: process.env.DATABASE_URL,
-  redisHost: process.env.REDIS_HOST,
-  redisPort: process.env.REDIS_PORT,
+  redisHost: process.env.REDIS_HOST || "localhost",
+  redisPort: !isNaN(Number(process.env.REDIS_PORT)) && Number(process.env.REDIS_PORT) > 0 ? Number(process.env.REDIS_PORT) : 6379,
   redisPassword: process.env.REDIS_PASSWORD,
   useRedisPassword: process.env.REDIS_USE_PASSWORD == "yes",
   bullPruneAgeSeconds:
