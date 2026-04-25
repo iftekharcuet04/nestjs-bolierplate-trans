@@ -1,16 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { GraphQLError } from "graphql";
-import { PrismaService } from "nestjs-prisma";
 import { UserResponseType } from "./dto/user.dto";
+import { UserRepository } from "./user.repository";
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   async getUserById(id: number): Promise<UserResponseType | null> {
-    const user = await this.prisma.user.findUnique({
-      where: { id } //1
-    });
+    const user = await this.userRepository.findUnique({ where: { id } });
 
     if (!user) {
       throw new GraphQLError("", {
