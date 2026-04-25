@@ -7,8 +7,22 @@ const createFileTransportTarget = (level: string): TransportTargetOptions => ({
   target: path.join(DIR_NAME, "pino.transport.js"),
   level,
   options: {
-    destination: "/logs/api.erros.log"
+    destination: path.join(process.cwd(), "logs", "api.errors.log")
   }
+});
+
+// Ensure logs directory exists
+const fs = require('fs');
+const logsDir = path.join(process.cwd(), 'logs');
+if (!fs.existsSync(logsDir)) {
+  fs.mkdirSync(logsDir, { recursive: true });
+}
+
+const createDatabaseTransportTarget = (
+  level: string
+): TransportTargetOptions => ({
+  target: path.join(DIR_NAME, "database.transport.js"),
+  level
 });
 
 const createRollbarTransportTarget = (
@@ -18,21 +32,27 @@ const createRollbarTransportTarget = (
   level
 });
 
+const useDbLogging = process.env.LOG_TO_DB === "1";
+
 const targets: TransportTargetOptions[] = [
   {
-    level: process.env.LOG_LEVEL || "warn",
+    level: process.env.LOG_LEVEL || "info",
     target: "pino/file",
     options: {
       destination: 1
     }
   },
-  ...(process.env.LOG_TO_FILE === "1"
+  ...(useDbLogging
     ? [
+        createDatabaseTransportTarget("error"),
+        createDatabaseTransportTarget("warn"),
+        createDatabaseTransportTarget("info")
+      ]
+    : [
         createFileTransportTarget("error"),
         createFileTransportTarget("warn"),
         createFileTransportTarget("debug")
-      ]
-    : []),
+      ]),
   ...(process.env.SLF_ROLLBAR_ACCESS_TOKEN
     ? [
         createRollbarTransportTarget("error"),
