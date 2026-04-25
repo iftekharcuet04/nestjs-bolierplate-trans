@@ -1,84 +1,62 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, OnModuleInit, Logger } from "@nestjs/common";
 import * as fs from "fs";
-import { GraphQLError } from "graphql";
 import * as path from "path";
 
 @Injectable()
-export class TranslationService {
-  private language: string = "en";
+export class TranslationService implements OnModuleInit {
+  private readonly logger = new Logger(TranslationService.name);
   private translations: Record<string, Record<string, string>> = {};
-  // Load translations for a specific language
-  private loadTranslations(): Record<string, string> {
-    if (this.translations[this.language]) {
-      return this.translations[this.language];
-    }
+  private readonly localesPath = path.resolve("./locales");
 
-    let translationFilePath = `${this.language}/translation.json`;
-
-    const filePath = path.resolve(`./locales/${translationFilePath}`);
-
-    if (fs.existsSync(filePath)) {
-      const content = fs.readFileSync(filePath, "utf-8");
-      this.translations[this.language] = JSON.parse(content);
-      return this.translations[this.language];
-    } else {
-      if (process.env.APP_ENVIRONMENT === "development") {
-        throw new GraphQLError(
-          `Translation file for language ${this.language} not found`,
-          {
-            extensions: { code: "NOT_FOUND" }
-          }
-        );
-      }
-    }
+  onModuleInit() {
+    this.preloadTranslations();
   }
 
-  translate(key: string, language?: string): string[] | string {
-    if (language) this.language = language;
-
-    const translations: Record<string, string> = this.loadTranslations();
-    let translatedMessage = key;
-    if (!translations) return translatedMessage;
-    if (Array.isArray(key)) {
-      return key
-        .map((str) => {
-          if (typeof str !== "string") return str;
-          str = str?.split(".")[str.split(".").length - 1] || str;
-          return this.getTranslationWithPlaceholders(str, translations);
-        })
-        .filter((value) => value !== null && value !== undefined);
-    }
-
-    // Handle single string input
-    return this.getTranslationWithPlaceholders(key, translations);
-  }
-
-  private getTranslationWithPlaceholders(
-    str: string,
-    translation: Record<string, string>
-  ): string {
-    let result = translation[str] || str;
+  private preloadTranslations() {
     try {
-      const parsed = JSON.parse(str);
-      if (typeof parsed === "object" && parsed !== null) {
-        const { key, ...rest } = parsed;
-        if (!key) {
-          result = str;
-        } else {
-          result = translation[key];
-          if (result && rest) {
-            Object.keys(rest).forEach((placeholder) => {
-              const regex = new RegExp(`{{${placeholder}}}`, "g");
-              result = result.replace(regex, rest[placeholder]);
-            });
-          } else {
-            result = key;
+      const languages = fs.readdirSync(this.localesPath);
+      for (const lang of languages) {
+        const langPath = path.join(this.localesPath, lang);
+        if (fs.statSync(langPath).isDirectory()) {
+          const filePath = path.join(langPath, "translation.json");
+          if (fs.existsSync(filePath)) {
+            const content = fs.readFileSync(filePath, "utf-8");
+            this.translations[lang] = JSON.parse(content);
+            this.logger.log(`Loaded translations for language: ${lang}`);
           }
         }
       }
     } catch (error) {
-      result = result || str;
+      this.logger.error("Failed to preload translations", error.stack);
     }
-    return result;
+  }
+
+  translate(key: string, language: string = "en"): string {
+    const translations = this.translations[language] || this.translations["en"];
+    if (!translations) return key;
+
+    let message = key;
+    
+    // Check if key is a JSON string containing placeholders
+    try {
+      if (key.startsWith('{') && key.endsWith('}')) {
+        const parsed = JSON.parse(key);
+        if (parsed && parsed.key) {
+          const translation = translations[parsed.key] || parsed.key;
+          return this.replacePlaceholders(translation, parsed);
+        }
+      }
+    } catch (e) {
+      // Not a JSON string, continue with normal lookup
+    }
+
+    const translation = translations[key] || key;
+    return translation;
+  }
+
+  private replacePlaceholders(text: string, params: Record<string, any>): string {
+    return text.replace(/{{(\w+)}}/g, (_, key) => {
+      return params[key] !== undefined ? String(params[key]) : `{{${key}}}`;
+    });
   }
 }
